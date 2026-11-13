@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <meta name="theme-color" content="#0B1F3A" />
+  <meta name="description" content="SGC Cheque Manager - Smart Cheque Management. Complete Control. Offline Cheque Management Application by Shekhawat Groups of Companies." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>SGC Cheque Manager | Shekhawat Groups of Companies</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Top Corporate Header -->
+  <header class="app-header no-print">
+    <div class="header-inner">
+      <div class="brand-area">
+        <div class="sgc-logo" aria-hidden="true">
+          <span class="sgc-monogram">SGC</span>
+        </div>
+        <div class="brand-text">
+          <div class="brand-org">SHEKHAWAT GROUPS OF COMPANIES</div>
+          <h1 class="brand-title">SGC CHEQUE MANAGER</h1>
+          <div class="brand-tagline">Smart Cheque Management. Complete Control.</div>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span id="network-status-badge" class="status-pill status-online" title="100% On-Device Local Storage">
+          <span class="status-dot"></span>
+          <span id="network-status-text">Offline Ready</span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Backup Reminder Banner -->
+  <div id="backup-reminder-banner" class="reminder-banner no-print hidden" role="region" aria-label="Backup Reminder">
+    <div class="reminder-content">
+      <span class="reminder-icon">&#9888;</span>
+      <span id="backup-reminder-text">Local storage reminder: Export a JSON backup to protect your records.</span>
+    </div>
+    <div class="reminder-actions">
+      <button type="button" class="btn btn-gold btn-sm" id="banner-backup-btn">Backup Now</button>
+      <button type="button" class="btn-icon-close" id="banner-dismiss-btn" aria-label="Dismiss reminder">&times;</button>
+    </div>
+  </div>
+
+  <!-- Main Workspace -->
+  <main class="app-main no-print">
+    <!-- VIEW 1: DASHBOARD -->
+    <section id="view-dashboard" class="view-section active" aria-labelledby="nav-dashboard">
+      <div class="section-header">
+        <div>
+          <h2>Executive Dashboard</h2>
+          <p class="section-subtitle">Overview across all registered Shekhawat Group entities</p>
+        </div>
+        <button type="button" class="btn btn-primary" data-goto="cheque-form">
+          + Prepare Cheque
+        </button>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Total Companies</div>
+          <div class="kpi-value" id="kpi-companies">0</div>
+          <div class="kpi-meta">Registered group entities</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Total Bank Accounts</div>
+          <div class="kpi-value" id="kpi-accounts">0</div>
+          <div class="kpi-meta">Configured cheque books</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Total Cheques</div>
+          <div class="kpi-value" id="kpi-total-cheques">0</div>
+          <div class="kpi-meta" id="kpi-total-amount">INR 0.00</div>
+        </div>
+        <div class="kpi-card kpi-gold">
+          <div class="kpi-label">Pending (Draft)</div>
+          <div class="kpi-value" id="kpi-pending-cheques">0</div>
+          <div class="kpi-meta" id="kpi-pending-amount">INR 0.00</div>
+        </div>
+        <div class="kpi-card kpi-royal">
+          <div class="kpi-label">Issued Cheques</div>
+          <div class="kpi-value" id="kpi-issued-cheques">0</div>
+          <div class="kpi-meta" id="kpi-issued-amount">INR 0.00</div>
+        </div>
+        <div class="kpi-card kpi-success">
+          <div class="kpi-label">Cleared Cheques</div>
+          <div class="kpi-value" id="kpi-cleared-cheques">0</div>
+          <div class="kpi-meta" id="kpi-cleared-amount">INR 0.00</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Quick Operations</h3>
+        </div>
+        <div class="quick-actions-grid">
+          <button type="button" class="quick-tile" data-goto="cheque-form">
+            <span class="tile-icon">&#9997;</span>
+            <span class="tile-title">New Cheque</span>
+            <span class="tile-desc">Prepare &amp; print leaf</span>
+          </button>
+          <button type="button" class="quick-tile" data-goto="companies">
+            <span class="tile-icon">&#127970;</span>
+            <span class="tile-title">Companies</span>
+            <span class="tile-desc">Manage group entities</span>
+          </button>
+          <button type="button" class="quick-tile" data-goto="accounts">
+            <span class="tile-icon">&#127974;</span>
+            <span class="tile-title">Bank Accounts</span>
+            <span class="tile-desc">Accounts &amp; calibration</span>
+          </button>
+          <button type="button" class="quick-tile" data-goto="register">
+            <span class="tile-icon">&#128209;</span>
+            <span class="tile-title">Cheque Register</span>
+            <span class="tile-desc">Search, filter &amp; CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Recent Cheque Transactions</h3>
+          <button type="button" class="btn btn-outline btn-sm" data-goto="register">View All</button>
+        </div>
+        <div id="dashboard-recent-list" class="recent-list">
+          <div class="empty-state">No cheque records yet. Start by adding a company and bank account.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: CHEQUE PREPARATION & PREVIEW -->
+    <section id="view-cheque-form" class="view-section" aria-labelledby="nav-cheque">
+      <div class="section-header">
+        <div>
+          <h2 id="cheque-form-heading">Cheque Preparation</h2>
+          <p class="section-subtitle">Enter cheque details with automatic Indian Rupee word conversion</p>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm" id="btn-reset-cheque-form">Clear Form</button>
+      </div>
+
+      <div id="cheque-prereq-alert" class="alert-box alert-warning hidden">
+        <strong>Setup Required:</strong> Please register at least one Company and one Bank Account before preparing a cheque.
+        <div class="mt-2">
+          <button type="button" class="btn btn-primary btn-sm" data-goto="companies">Go to Companies</button>
+        </div>
+      </div>
+
+      <form id="cheque-entry-form" class="card" novalidate>
+        <input type="hidden" id="chq-id" />
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="chq-company">Select Company <span class="req">*</span></label>
+            <select id="chq-company" required>
+              <option value="">-- Choose Company --</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="chq-account">Select Bank Account <span class="req">*</span></label>
+            <select id="chq-account" required>
+              <option value="">-- Choose Bank Account --</option>
+            </select>
+            <small id="chq-account-hint" class="field-hint"></small>
+          </div>
+
+          <div class="form-group">
+            <label for="chq-number">Cheque Number <span class="req">*</span></label>
+            <input type="text" id="chq-number" inputmode="numeric" maxlength="20" placeholder="e.g., 458901" required />
+          </div>
+
+          <div class="form-group">
+            <label for="chq-date">Cheque Date <span class="req">*</span></label>
+            <input type="date" id="chq-date" required />
+          </div>
+
+          <div class="form-group form-span-2">
+            <label for="chq-payee">Payee Name <span class="req">*</span></label>
+            <input type="text" id="chq-payee" maxlength="100" placeholder="Full name of individual, vendor, or organization" required />
+          </div>
+
+          <div class="form-group">
+            <label for="chq-amount">Amount in INR (&#8377;) <span class="req">*</span></label>
+            <input type="number" id="chq-amount" step="0.01" min="0.01" max="9999999999.99" placeholder="0.00" required />
+          </div>
+
+          <div class="form-group">
+            <label for="chq-status">Cheque Status <span class="req">*</span></label>
+            <select id="chq-status" required>
+              <option value="Draft">Draft</option>
+              <option value="Issued">Issued</option>
+              <option value="Cleared">Cleared</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+
+          <div class="form-group form-span-2">
+            <label>Amount in Indian English Words</label>
+            <div id="chq-amount-words-box" class="words-display-box">Zero Rupees Only</div>
+          </div>
+
+          <div class="form-group form-span-2">
+            <label class="checkbox-label">
+              <input type="checkbox" id="chq-ac-payee" checked />
+              <span>Print <strong>A/C PAYEE ONLY</strong> crossing on cheque</span>
+            </label>
+          </div>
+
+          <div class="form-group form-span-2">
+            <label for="chq-remarks">Purpose / Remarks</label>
+            <input type="text" id="chq-remarks" maxlength="160" placeholder="Invoice reference, project note, or payment purpose" />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-lg" id="btn-save-cheque">
+            Save Cheque Record
+          </button>
+          <button type="button" class="btn btn-gold btn-lg" id="btn-open-print-studio">
+            Preview &amp; Print Cheque
+          </button>
+        </div>
+      </form>
+
+      <!-- Live Cheque Preview & Per-Account Calibration Studio -->
+      <div class="card" id="print-studio-card">
+        <div class="card-header">
+          <div>
+            <h3>Cheque Preview &amp; Print Calibration</h3>
+            <p class="section-subtitle">Configured independently per bank account &bull; Use genuine bank-issued cheque leaves</p>
+          </div>
+          <span class="badge badge-navy" id="calibration-account-label">No Account Selected</span>
+        </div>
+
+        <div class="compliance-notice">
+          <strong>Printing Compliance Notice:</strong> This preview renders only your payment fields (A/C Payee, Date, Payee, Amount in Words, and Amount in Figures) with a blank signature area. No bank logos, MICR lines, or security patterns are generated. Always test alignment on plain A4/cheque-sized paper before feeding a genuine bank-issued cheque leaf.
+        </div>
+
+        <!-- Visual Leaf Preview Container (Scrollable horizontally only inside preview frame if screen is narrow) -->
+        <div class="cheque-preview-wrapper">
+          <div id="cheque-preview-leaf" class="cheque-leaf-canvas" aria-label="Cheque Print Preview">
+            <div class="leaf-guide-header">GENUINE CHEQUE LEAF OVERLAY PREVIEW (SIGNATURE AREA LEFT BLANK)</div>
+            <div id="prev-ac-payee" class="leaf-field leaf-ac-payee">A/C PAYEE ONLY</div>
+            <div id="prev-date" class="leaf-field leaf-date">DDMMYYYY</div>
+            <div id="prev-payee" class="leaf-field leaf-payee">Payee Name</div>
+            <div id="prev-words" class="leaf-field leaf-words">Rupees Zero Only</div>
+            <div id="prev-amount" class="leaf-field leaf-amount">**0.00/-**</div>
+            <div class="leaf-sign-placeholder">Authorized Signatory (Blank)</div>
+          </div>
+        </div>
+
+        <!-- Per-Account X/Y Calibration Controls -->
+        <details class="calibration-drawer" open>
+          <summary>Adjust Field Positions (X / Y mm), Font Size &amp; Print Scale</summary>
+          <div class="calibration-grid">
+            <div class="calib-group">
+              <h4>General Layout</h4>
+              <label>Font Size (pt)
+                <input type="number" id="cal-font-size" step="0.5" min="8" max="18" value="11" />
+              </label>
+              <label>Print Scale (0.80 - 1.20)
+                <input type="number" id="cal-print-scale" step="0.01" min="0.80" max="1.20" value="1.00" />
+              </label>
+              <label>Date Letter Spacing (mm)
+                <input type="number" id="cal-date-spacing" step="0.2" min="0" max="10" value="3.2" />
+              </label>
+            </div>
+
+            <div class="calib-group">
+              <h4>Date Position (mm)</h4>
+              <label>Date X (Left)
+                <input type="number" id="cal-date-x" step="0.5" min="0" max="220" value="152" />
+              </label>
+              <label>Date Y (Top)
+                <input type="number" id="cal-date-y" step="0.5" min="0" max="100" value="9" />
+              </label>
+            </div>
+
+            <div class="calib-group">
+              <h4>Payee Position (mm)</h4>
+              <label>Payee X (Left)
+                <input type="number" id="cal-payee-x" step="0.5" min="0" max="200" value="24" />
+              </label>
+              <label>Payee Y (Top)
+                <input type="number" id="cal-payee-y" step="0.5" min="0" max="100" value="23" />
+              </label>
+            </div>
+
+            <div class="calib-group">
+              <h4>Amount in Words (mm)</h4>
+              <label>Words X (Left)
+                <input type="number" id="cal-words-x" step="0.5" min="0" max="200" value="30" />
+              </label>
+              <label>Words Y (Top)
+                <input type="number" id="cal-words-y" step="0.5" min="0" max="100" value="33" />
+              </label>
+              <label>Words Wrap Width (mm)
+                <input type="number" id="cal-words-w" step="1" min="50" max="180" value="115" />
+              </label>
+            </div>
+
+            <div class="calib-group">
+              <h4>Amount in Figures (mm)</h4>
+              <label>Figures X (Left)
+                <input type="number" id="cal-amount-x" step="0.5" min="0" max="220" value="156" />
+              </label>
+              <label>Figures Y (Top)
+                <input type="number" id="cal-amount-y" step="0.5" min="0" max="100" value="42" />
+              </label>
+            </div>
+
+            <div class="calib-group">
+              <h4>A/C Payee Stamp (mm)</h4>
+              <label>A/C Payee X (Left)
+                <input type="number" id="cal-ac-x" step="0.5" min="0" max="180" value="14" />
+              </label>
+              <label>A/C Payee Y (Top)
+                <input type="number" id="cal-ac-y" step="0.5" min="0" max="90" value="12" />
+              </label>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-primary" id="btn-save-calibration">
+              Save Calibration for This Bank Account
+            </button>
+            <button type="button" class="btn btn-outline" id="btn-reset-calibration">
+              Reset Default Offsets
+            </button>
+          </div>
+        </details>
+
+        <div class="form-actions print-buttons-row">
+          <button type="button" class="btn btn-outline btn-lg" id="btn-print-test-plain">
+            &#128424; Plain-Paper Alignment Test Print
+          </button>
+          <button type="button" class="btn btn-gold btn-lg" id="btn-print-cheque-final">
+            &#128424; Print on Cheque Leaf
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: CHEQUE REGISTER -->
+    <section id="view-register" class="view-section" aria-labelledby="nav-register">
+      <div class="section-header">
+        <div>
+          <h2>Cheque Register</h2>
+          <p class="section-subtitle">Audit, filter, export CSV, or print official cheque records</p>
+        </div>
+        <div class="header-action-group">
+          <button type="button" class="btn btn-outline btn-sm" id="btn-export-csv">Export CSV</button>
+          <button type="button" class="btn btn-primary btn-sm" id="btn-print-register">Print Register</button>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="card filter-card">
+        <div class="filter-grid">
+          <div class="form-group">
+            <label for="reg-search">Search Payee / Cheque # / Remarks</label>
+            <input type="search" id="reg-search" placeholder="Search keyword..." />
+          </div>
+          <div class="form-group">
+            <label for="reg-filter-company">Company</label>
+            <select id="reg-filter-company">
+              <option value="">All Companies</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="reg-filter-account">Bank Account</label>
+            <select id="reg-filter-account">
+              <option value="">All Bank Accounts</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="reg-filter-status">Status</label>
+            <select id="reg-filter-status">
+              <option value="">All Statuses</option>
+              <option value="Draft">Draft</option>
+              <option value="Issued">Issued</option>
+              <option value="Cleared">Cleared</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="reg-date-from">From Date</label>
+            <input type="date" id="reg-date-from" />
+          </div>
+          <div class="form-group">
+            <label for="reg-date-to">To Date</label>
+            <input type="date" id="reg-date-to" />
+          </div>
+        </div>
+        <div class="filter-footer">
+          <span id="register-summary-text" class="summary-chip">Showing 0 cheques &bull; Total: INR 0.00</span>
+          <button type="button" class="btn btn-outline btn-sm" id="btn-clear-filters">Reset Filters</button>
+        </div>
+      </div>
+
+      <!-- Register Cards / Table -->
+      <div id="register-list-container" class="register-list">
+        <div class="card empty-state">No cheques match the selected criteria.</div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: COMPANIES -->
+    <section id="view-companies" class="view-section" aria-labelledby="nav-companies">
+      <div class="section-header">
+        <div>
+          <h2>Company Management</h2>
+          <p class="section-subtitle">Manage sister concerns and divisions under Shekhawat Groups of Companies</p>
+        </div>
+      </div>
+
+      <form id="company-form" class="card" novalidate>
+        <h3 id="company-form-title">Add New Company</h3>
+        <input type="hidden" id="comp-id" />
+        <div class="form-grid">
+          <div class="form-group form-span-2">
+            <label for="comp-name">Company Name <span class="req">*</span></label>
+            <input type="text" id="comp-name" maxlength="120" placeholder="e.g., Shekhawat Infrastructure Pvt. Ltd." required />
+          </div>
+          <div class="form-group form-span-2">
+            <label for="comp-address">Registered Office Address</label>
+            <input type="text" id="comp-address" maxlength="200" placeholder="Street, City, State, PIN" />
+          </div>
+          <div class="form-group">
+            <label for="comp-phone">Phone Number</label>
+            <input type="tel" id="comp-phone" maxlength="30" placeholder="+91 98290 XXXXX" />
+          </div>
+          <div class="form-group">
+            <label for="comp-email">Official Email</label>
+            <input type="email" id="comp-email" maxlength="100" placeholder="accounts@shekhawatgroup.com" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="btn-save-company">Save Company</button>
+          <button type="button" class="btn btn-outline hidden" id="btn-cancel-company">Cancel Edit</button>
+        </div>
+      </form>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Registered Companies (<span id="companies-count">0</span>)</h3>
+        </div>
+        <div id="companies-list" class="entity-list">
+          <div class="empty-state">No companies added yet.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 5: BANK ACCOUNTS -->
+    <section id="view-accounts" class="view-section" aria-labelledby="nav-accounts">
+      <div class="section-header">
+        <div>
+          <h2>Bank Account Management</h2>
+          <p class="section-subtitle">Configure bank accounts and cheque leaf printing profiles per company</p>
+        </div>
+      </div>
+
+      <form id="account-form" class="card" novalidate>
+        <h3 id="account-form-title">Add Bank Account</h3>
+        <input type="hidden" id="acct-id" />
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="acct-company">Company <span class="req">*</span></label>
+            <select id="acct-company" required>
+              <option value="">-- Select Company --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="acct-bank">Bank Name <span class="req">*</span></label>
+            <input type="text" id="acct-bank" maxlength="100" placeholder="e.g., State Bank of India / HDFC Bank" required />
+          </div>
+          <div class="form-group">
+            <label for="acct-branch">Branch Name <span class="req">*</span></label>
+            <input type="text" id="acct-branch" maxlength="100" placeholder="e.g., MI Road, Jaipur" required />
+          </div>
+          <div class="form-group">
+            <label for="acct-holder">Account Holder Name <span class="req">*</span></label>
+            <input type="text" id="acct-holder" maxlength="120" placeholder="Account title printed on cheque" required />
+          </div>
+          <div class="form-group">
+            <label for="acct-number">Account Number (Optional, Masked in Lists)</label>
+            <input type="text" id="acct-number" maxlength="30" placeholder="Digits masked automatically for privacy" />
+          </div>
+          <div class="form-group">
+            <label for="acct-ifsc">IFSC Code (Optional)</label>
+            <input type="text" id="acct-ifsc" maxlength="15" placeholder="e.g., SBIN0001234" style="text-transform:uppercase;" />
+          </div>
+          <div class="form-group form-span-2">
+            <label for="acct-notes">Cheque Leaf Size / Printing Notes</label>
+            <input type="text" id="acct-notes" maxlength="180" placeholder="e.g., CTS-2010 Standard 203mm x 93mm, Feed face-up center tray" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="btn-save-account">Save Bank Account</button>
+          <button type="button" class="btn btn-outline hidden" id="btn-cancel-account">Cancel Edit</button>
+        </div>
+      </form>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Configured Bank Accounts (<span id="accounts-count">0</span>)</h3>
+        </div>
+        <div id="accounts-list" class="entity-list">
+          <div class="empty-state">No bank accounts configured yet.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 6: BACKUP & DATA SECURITY -->
+    <section id="view-backup" class="view-section" aria-labelledby="nav-backup">
+      <div class="section-header">
+        <div>
+          <h2>Backup, Restore &amp; Data Control</h2>
+          <p class="section-subtitle">100% offline storage &bull; Zero cloud transmission &bull; Complete owner control</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Device Storage Status</h3>
+          <span class="badge badge-success">On-Device IndexedDB</span>
+        </div>
+        <p class="body-text">
+          All companies, bank accounts, calibration profiles, and cheque records are stored exclusively in this browser's local database on your device. Nothing is ever sent to any external server.
+        </p>
+        <div class="meta-row">
+          <strong>Last Manual Backup:</strong> <span id="last-backup-timestamp">Never backed up</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>1. Export JSON Backup</h3>
+        <p class="body-text">
+          Download a complete, portable JSON snapshot of all your companies, bank accounts, print settings, and cheque records. Store this file safely in your phone's Downloads folder, Google Drive, or USB drive.
+        </p>
+        <button type="button" class="btn btn-primary btn-lg" id="btn-export-json">
+          Download Complete JSON Backup
+        </button>
+      </div>
+
+      <div class="card">
+        <h3>2. Restore from JSON Backup</h3>
+        <p class="body-text">
+          Select a previously exported <code>.json</code> backup file to restore your records. This will replace current records on this device after your confirmation.
+        </p>
+        <div class="restore-box">
+          <input type="file" id="restore-file-input" accept=".json,application/json" />
+          <button type="button" class="btn btn-gold" id="btn-restore-json">
+            Restore Backup File
+          </button>
+        </div>
+      </div>
+
+      <div class="card danger-card">
+        <h3>3. Permanently Delete Local Data</h3>
+        <p class="body-text">
+          Erase all companies, bank accounts, and cheque records stored on this device. Make sure you have downloaded a JSON backup first.
+        </p>
+        <button type="button" class="btn btn-danger" id="btn-wipe-data">
+          Permanently Erase All Local Data
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom Mobile Navigation Bar -->
+  <nav class="bottom-nav no-print" aria-label="Primary Navigation">
+    <button type="button" class="nav-item active" id="nav-dashboard" data-view="dashboard">
+      <span class="nav-icon">&#127968;</span>
+      <span class="nav-label">Home</span>
+    </button>
+    <button type="button" class="nav-item" id="nav-cheque" data-view="cheque-form">
+      <span class="nav-icon">&#9997;</span>
+      <span class="nav-label">Cheque</span>
+    </button>
+    <button type="button" class="nav-item" id="nav-register" data-view="register">
+      <span class="nav-icon">&#128209;</span>
+      <span class="nav-label">Register</span>
+    </button>
+    <button type="button" class="nav-item" id="nav-companies" data-view="companies">
+      <span class="nav-icon">&#127970;</span>
+      <span class="nav-label">Companies</span>
+    </button>
+    <button type="button" class="nav-item" id="nav-accounts" data-view="accounts">
+      <span class="nav-icon">&#127974;</span>
+      <span class="nav-label">Banks</span>
+    </button>
+    <button type="button" class="nav-item" id="nav-backup" data-view="backup">
+      <span class="nav-icon">&#128190;</span>
+      <span class="nav-label">Backup</span>
+    </button>
+  </nav>
+
+  <!-- Dedicated Print Sheet (Rendered Only When Printing) -->
+  <div id="print-output-container" class="print-only" aria-hidden="true"></div>
+
+  <!-- Custom Accessible Confirmation Modal -->
+  <div id="confirm-modal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <h3 id="modal-title">Confirm Action</h3>
+      <p id="modal-message">Are you sure you want to proceed?</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="modal-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" id="modal-confirm-btn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast-container" class="toast-container no-print" aria-live="polite"></div>
+
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
